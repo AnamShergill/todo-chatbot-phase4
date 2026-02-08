@@ -1,0 +1,36 @@
+replicaCount: 1
+
+image:
+  repository: todo-backend
+  tag: local
+  pullPolicy: Never
+
+service:
+  type: NodePort
+  port: 8000
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+# Health probe configuration
+healthProbe:
+  path: /health
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# ConfigMap for non-sensitive config
+config:
+  frontendUrl: "http://todo-frontend"
+  logLevel: "info"
+  corsOrigins: "*"
+
+# Secret references
+secrets:
+  existingSecret: todo-backend-secret

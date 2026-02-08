@@ -1,0 +1,43 @@
+openapi: 3.0.3
+info:
+  title: Todo Chatbot Backend API
+  description: API for the Todo Chatbot backend service
+  version: 1.0.0
+servers:
+  - url: http://localhost:8000
+    description: Local development server
+paths:
+  /health:
+    get:
+      summary: Health check endpoint
+      description: Returns the health status of the backend service
+      responses:
+        '200':
+          description: Health status OK
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "ok"
+                    description: Current health status of the service
+                required:
+                  - status
+        '503':
+          description: Service unavailable
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "unhealthy"
+                    description: Unhealthy service status
+                  error:
+                    type: string
+                    description: Error details if service is unhealthy
+                required:
+                  - status

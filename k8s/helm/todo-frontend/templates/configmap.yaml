@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}-config
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+data:
+  NEXT_PUBLIC_API_BASE_URL: {{ .Values.config.apiUrl | quote }}
+  NEXT_PUBLIC_CHATKIT_ENABLED: {{ .Values.config.chatkitEnabled | quote }}

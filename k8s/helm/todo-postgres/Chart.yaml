@@ -1,0 +1,6 @@
+apiVersion: v2
+name: todo-postgres
+description: PostgreSQL database for Todo Chatbot application
+type: application
+version: 1.0.0
+appVersion: "16.0"

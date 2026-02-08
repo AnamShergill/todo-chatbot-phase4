@@ -1,0 +1,86 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+.venv/
+venv/
+ENV/
+env/
+clean_env/
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Testing
+.pytest_cache/
+.coverage
+htmlcov/
+*.cover
+.hypothesis/
+test_*.py
+*_test.py
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+todo_app.db
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Docker
+Dockerfile*
+docker-compose*.yml
+.dockerignore
+
+# Documentation
+README.md
+*.md
+docs/
+
+# CI/CD
+.github/
+.gitlab-ci.yml
+.travis.yml
+
+# Logs
+*.log
+logs/
+
+# Temporary files
+tmp*/
+*.tmp
+temp/
+tmpclaude-*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Project specific
+render.yaml
+Procfile
+runtime.txt
+package-lock.json
+check_versions.py
+demonstration.py
+start_server.py
+=42.0.0

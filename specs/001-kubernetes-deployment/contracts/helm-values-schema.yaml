@@ -1,0 +1,299 @@
+# Helm Values Schema for Todo Chatbot Kubernetes Deployment
+# This file defines the structure and default values for all Helm charts
+
+global:
+  # Namespace for all resources
+  namespace: todo-chatbot
+
+  # Common labels applied to all resources
+  labels:
+    app: todo-chatbot
+    environment: local
+    managed-by: helm
+
+# PostgreSQL Database Configuration
+postgres:
+  enabled: true
+
+  # Chart information
+  chart:
+    name: todo-postgres
+    version: 1.0.0
+
+  # Deployment configuration
+  replicas: 1
+
+  # Container image
+  image:
+    repository: bitnami/postgresql
+    tag: latest
+    pullPolicy: IfNotPresent
+
+  # Storage configuration
+  storage:
+    size: 5Gi
+    storageClassName: standard
+    accessMode: ReadWriteOnce
+
+  # Resource allocation
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+
+  # Security context
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1001
+    fsGroup: 1001
+
+  # Database credentials (to be generated or provided)
+  credentials:
+    user: postgres
+    password: ""  # Generated if empty
+    database: todo_chatbot
+
+  # Health probe configuration
+  healthProbes:
+    liveness:
+      enabled: true
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      failureThreshold: 3
+      timeoutSeconds: 5
+      command: ["pg_isready", "-U", "postgres"]
+    readiness:
+      enabled: true
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      failureThreshold: 3
+      timeoutSeconds: 5
+      command: ["pg_isready", "-U", "postgres"]
+
+  # Service configuration
+  service:
+    type: ClusterIP
+    port: 5432
+    name: todo-postgres
+
+  # Initialization configuration
+  initdb:
+    enabled: true
+    configMapName: todo-postgres-init
+    scriptPath: /docker-entrypoint-initdb.d
+
+# Backend (FastAPI) Configuration
+backend:
+  enabled: true
+
+  # Chart information
+  chart:
+    name: todo-backend
+    version: 1.0.0
+
+  # Deployment configuration
+  replicas: 1
+
+  # Container image
+  image:
+    repository: todo-backend
+    tag: local
+    pullPolicy: Never  # Local image
+
+  # Resource allocation
+  resources:
+    requests:
+      cpu: 500m
+      memory: 1Gi
+    limits:
+      cpu: 1000m
+      memory: 2Gi
+
+  # Security context
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 1000
+
+  # Application configuration
+  config:
+    # Non-sensitive configuration (ConfigMap)
+    frontendUrl: "http://todo-frontend"
+    logLevel: "info"
+    corsOrigins: "http://localhost"
+
+    # Sensitive configuration (Secret)
+    jwtSecret: ""  # Generated if empty
+    openaiApiKey: ""  # Must be provided
+    databaseUrl: ""  # Constructed from postgres credentials
+
+  # Health probe configuration
+  healthProbes:
+    liveness:
+      enabled: true
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      failureThreshold: 3
+      timeoutSeconds: 5
+      httpGet:
+        path: /health
+        port: 8000
+    readiness:
+      enabled: true
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      failureThreshold: 3
+      timeoutSeconds: 5
+      httpGet:
+        path: /health
+        port: 8000
+
+  # Service configuration
+  service:
+    type: ClusterIP
+    port: 8000
+    targetPort: 8000
+    name: todo-backend
+
+  # Rolling update strategy
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+
+# Frontend (Next.js) Configuration
+frontend:
+  enabled: true
+
+  # Chart information
+  chart:
+    name: todo-frontend
+    version: 1.0.0
+
+  # Deployment configuration
+  replicas: 1
+
+  # Container image
+  image:
+    repository: todo-frontend
+    tag: local
+    pullPolicy: Never  # Local image
+
+  # Resource allocation
+  resources:
+    requests:
+      cpu: 250m
+      memory: 512Mi
+    limits:
+      cpu: 500m
+      memory: 1Gi
+
+  # Security context
+  securityContext:
+    runAsNonRoot: true
+    runAsUser: 1000
+    fsGroup: 1000
+
+  # Application configuration
+  config:
+    # Public environment variables (ConfigMap)
+    nextPublicApiUrl: "http://todo-backend:8000"
+    nextPublicChatKitEnabled: "true"
+
+  # Health probe configuration
+  healthProbes:
+    liveness:
+      enabled: true
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      failureThreshold: 3
+      timeoutSeconds: 5
+      httpGet:
+        path: /
+        port: 3000
+    readiness:
+      enabled: true
+      initialDelaySeconds: 30
+      periodSeconds: 10
+      failureThreshold: 3
+      timeoutSeconds: 5
+      httpGet:
+        path: /
+        port: 3000
+
+  # Service configuration
+  service:
+    type: LoadBalancer
+    port: 80
+    targetPort: 3000
+    name: todo-frontend
+
+  # Rolling update strategy
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 0
+
+# Minikube-specific configuration
+minikube:
+  # Cluster resources
+  cpus: 4
+  memory: 8192  # MB
+
+  # Addons to enable
+  addons:
+    - ingress
+    - metrics-server
+
+  # Tunnel configuration
+  tunnel:
+    enabled: true
+    cleanup: true
+
+# AI Tools Configuration
+aiTools:
+  # kubectl-ai configuration
+  kubectlAi:
+    enabled: true
+    version: "v0.0.29"
+    fallbackToManual: true
+
+  # Kagent configuration
+  kagent:
+    enabled: true
+    version: "v0.7"
+    analysisEnabled: true
+
+  # Gordon configuration
+  gordon:
+    enabled: false  # Containerization already complete
+    version: "post-4.50.0"
+
+# Deployment order and dependencies
+deployment:
+  order:
+    - namespace
+    - secrets
+    - configmaps
+    - pvc
+    - postgres
+    - backend
+    - frontend
+
+  # Wait conditions
+  waitForReady:
+    enabled: true
+    timeout: 300  # seconds
+    checkInterval: 5  # seconds
+
+# Cleanup configuration
+cleanup:
+  # Resources to delete on teardown
+  deleteNamespace: true
+  deletePVC: true
+  stopMinikube: false  # Keep cluster running by default

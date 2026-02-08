@@ -1,0 +1,53 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Chart.Name }}
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Chart.Name }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Chart.Name }}
+    spec:
+      containers:
+      - name: frontend
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.service.targetPort }}
+          name: http
+        env:
+        - name: NEXT_PUBLIC_API_BASE_URL
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Chart.Name }}-config
+              key: NEXT_PUBLIC_API_BASE_URL
+        - name: NEXT_PUBLIC_CHATKIT_ENABLED
+          valueFrom:
+            configMapKeyRef:
+              name: {{ .Chart.Name }}-config
+              key: NEXT_PUBLIC_CHATKIT_ENABLED
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        livenessProbe:
+          httpGet:
+            path: {{ .Values.healthProbe.path }}
+            port: http
+          initialDelaySeconds: {{ .Values.healthProbe.initialDelaySeconds }}
+          periodSeconds: {{ .Values.healthProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.healthProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.healthProbe.failureThreshold }}
+        readinessProbe:
+          httpGet:
+            path: {{ .Values.healthProbe.path }}
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: {{ .Values.healthProbe.periodSeconds }}
+          timeoutSeconds: {{ .Values.healthProbe.timeoutSeconds }}
+          failureThreshold: {{ .Values.healthProbe.failureThreshold }}

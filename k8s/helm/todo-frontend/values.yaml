@@ -1,0 +1,32 @@
+replicaCount: 1
+
+image:
+  repository: todo-frontend
+  tag: local
+  pullPolicy: Never
+
+service:
+  type: NodePort
+  port: 80
+  targetPort: 3000
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 250m
+    memory: 512Mi
+
+# Health probe configuration
+healthProbe:
+  path: /
+  initialDelaySeconds: 30
+  periodSeconds: 10
+  timeoutSeconds: 5
+  failureThreshold: 3
+
+# ConfigMap for environment variables
+config:
+  apiUrl: "http://127.0.0.1:50193"
+  chatkitEnabled: "true"

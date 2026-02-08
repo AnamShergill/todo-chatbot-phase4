@@ -1,0 +1,33 @@
+replicaCount: 1
+
+image:
+  repository: postgres
+  tag: "16-alpine"
+  pullPolicy: IfNotPresent
+
+service:
+  type: ClusterIP
+  port: 5432
+
+resources:
+  requests:
+    cpu: 100m
+    memory: 256Mi
+  limits:
+    cpu: 500m
+    memory: 512Mi
+
+persistence:
+  enabled: true
+  storageClass: ""
+  size: 5Gi
+
+# Database credentials (will be overridden by Secret)
+auth:
+  database: todo_chatbot
+  username: postgres
+  existingSecret: todo-postgres-secret
+
+# Init script will be provided via ConfigMap
+initdb:
+  scriptsConfigMap: todo-postgres-init
