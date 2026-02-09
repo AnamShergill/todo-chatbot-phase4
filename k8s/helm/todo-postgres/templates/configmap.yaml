@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ .Chart.Name }}-init
+  namespace: {{ .Release.Namespace }}
+  labels:
+    app: {{ .Chart.Name }}
+data:
+  init.sql: |
+    -- Create database if not exists
+    SELECT 'CREATE DATABASE todo_chatbot'
+    WHERE NOT EXISTS (SELECT FROM pg_database WHERE datname = 'todo_chatbot')\gexec

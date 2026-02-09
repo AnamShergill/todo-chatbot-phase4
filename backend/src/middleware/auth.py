@@ -5,7 +5,7 @@ from typing import Optional
 import os
 
 # Configuration
-SECRET_KEY = os.getenv("SECRET_KEY", "your-secret-key-here")  # Use SECRET_KEY environment variable
+SECRET_KEY = os.getenv("JWT_SECRET") or os.getenv("SECRET_KEY", "your-secret-key-here")  # Use JWT_SECRET or SECRET_KEY environment variable
 ALGORITHM = "HS256"
 
 security = HTTPBearer()

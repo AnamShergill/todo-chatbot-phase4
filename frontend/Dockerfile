@@ -61,9 +61,11 @@ COPY --from=builder --chown=nodejs:nodejs /app/.next ./.next
 COPY --from=builder --chown=nodejs:nodejs /app/public ./public
 
 # Accept NEXT_PUBLIC_ variables at build time (optional - for dynamic values)
-ARG NEXT_PUBLIC_API_URL
+ARG NEXT_PUBLIC_API_BASE_URL
+ARG NEXT_PUBLIC_CHATKIT_ENABLED
 ARG NEXT_PUBLIC_APP_ENV
-ENV NEXT_PUBLIC_API_URL=${NEXT_PUBLIC_API_URL} \
+ENV NEXT_PUBLIC_API_BASE_URL=${NEXT_PUBLIC_API_BASE_URL} \
+    NEXT_PUBLIC_CHATKIT_ENABLED=${NEXT_PUBLIC_CHATKIT_ENABLED} \
     NEXT_PUBLIC_APP_ENV=${NEXT_PUBLIC_APP_ENV}
 
 # Switch to non-root user
